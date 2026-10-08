@@ -1,50 +1,46 @@
 # ============================================================
 #  Top_Anime Bot — Konfiguratsiya
 # ============================================================
-# LOKAL kompyuterda ishlatish uchun: pastdagi os.environ.get(...)
-# ichidagi ikkinchi qiymatlarni o'zingizning haqiqiy
-# ma'lumotlaringiz bilan almashtirishingiz mumkin.
-#
-# RENDER (yoki boshqa server) uchun: hech narsani bu faylda
-# o'zgartirmang! Buning o'rniga Render dashboardida
-# "Environment" bo'limiga quyidagi qiymatlarni environment
-# variable sifatida qo'shing:
-#   BOT_TOKEN, ADMIN_IDS, SUPER_ADMIN_USERNAMES,
+# Maxfiy qiymatlar (token va h.k.) bu faylda YOZILMAYDI.
+# Ular .env fayldan (lokal) yoki Render "Environment" bo'limidan
+# (serverda) o'qiladi:
+#   BOT_TOKEN, ADMIN_IDS, SUPER_ADMIN_USERNAMES, ANIME_CHANNEL,
 #   TURSO_DATABASE_URL, TURSO_AUTH_TOKEN
-# Shunda kod ichida maxfiy ma'lumotlar saqlanmaydi va GitHub'ga
-# xavfsiz push qilinadi.
 # ============================================================
 
 import os
 
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "8701202501:AAFtsfJkO-_p5uNpqqTCyrR9HIr7JHf29IE")
+# Lokal ishlatishda .env faylni o'qiydi (python-dotenv o'rnatilgan bo'lsa).
+# Render'da bu kerak emas, u yerda o'zgaruvchilar to'g'ridan-to'g'ri keladi.
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
-ANIME_CHANNEL = "@animelartopuz"
+# bot.py shu qiymatni tekshiradi, shuning uchun o'zgartirmang
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "PASTE_YOUR_BOT_TOKEN_HERE")
 
-# ADMIN_IDS environment variable orqali keladi, masalan: "123456789,987654321"
-# Bu ro'yxatdagilar "bot egasi" — doim super admin.
-# DIQQAT: 123456789 o'rniga o'zingizning Telegram ID raqamingizni yozing!
+ANIME_CHANNEL = os.environ.get("ANIME_CHANNEL", "@animelartopuz")
+
+# ADMIN_IDS: masalan "123456789,987654321". Bular "bot egasi" — doim super admin.
 _admin_ids_raw = os.environ.get("ADMIN_IDS", "8888728779")
 ADMIN_IDS = [int(x.strip()) for x in _admin_ids_raw.split(",") if x.strip()]
 
 # Super adminlar username bo'yicha (@belgisiz), vergul bilan ajratiladi.
-# Masalan: "mening_username,boshqa_odam". Bo'sh qoldirsangiz ham bo'ladi —
-# u holda faqat ADMIN_IDS dagilar super admin bo'ladi.
 _super_raw = os.environ.get("SUPER_ADMIN_USERNAMES", "")
 SUPER_ADMIN_USERNAMES = [x.strip().lstrip("@") for x in _super_raw.split(",") if x.strip()]
 
 # ---------------------------------------------------------------
-# Turso (libSQL) — bulutli, bepul va doimiy ma'lumotlar bazasi.
-# Render qayta deploy qilinganda ham ma'lumotlar o'chib ketmaydi.
-# turso.tech saytida bazangizni yaratganingizda beriladigan
-# manzil va tokenni shu yerga (yoki Render Environment'ga) kiriting.
+# Turso (libSQL). libsql:// manzili WebSocket (wss://) orqali ulanib,
+# 400 xatosini beradi, shuning uchun avtomatik https:// ga o'giramiz.
 #
-# Agar mahalliy kompyuterda, internet bazasisiz sinab ko'rmoqchi
-# bo'lsangiz, TURSO_DATABASE_URL ni "file:uzumdub.db" qilib
-# qoldiring — bu holda oddiy lokal fayl ishlatiladi (Render'da
-# BUNI QILMANG, aks holda yana ma'lumot o'chib turadi).
+# Lokal sinov uchun TURSO_DATABASE_URL ni "file:uzumdub.db" qilsa
+# bo'ladi (Render'da BUNI QILMANG).
 # ---------------------------------------------------------------
-TURSO_DATABASE_URL = os.environ.get("TURSO_DATABASE_URL", "file:uzumdub.db")
+TURSO_DATABASE_URL = os.environ.get("TURSO_DATABASE_URL", "file:uzumdub.db").replace(
+    "libsql://", "https://"
+)
 TURSO_AUTH_TOKEN = os.environ.get("TURSO_AUTH_TOKEN", "")
 
 STUDIO_NAME = "Top_Anime"
